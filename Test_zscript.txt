@@ -1,0 +1,83 @@
+
+[VarDef,dllPath,""]//path to dll
+[VarDef,err,0]//standard error
+[VarDef,ver,0]//version
+[VarDef,stringArg,""]
+[VarDef,responseString,""]
+
+[RoutineDef,CheckSystem,
+	[VarSet,dllPath,"ZSOCKET.dll"]
+	[If,[FileExists,dllPath],
+		,
+		[Note,"DLL is missing"][Exit]
+	]
+]
+
+
+[IButton, "GetSocketAddr",,
+	[RoutineCall,CheckSystem]
+	[MemCreate, addr, 256, 0]
+	[VarSet, err, [FileExecute,[Var,dllPath],"GetSocketAddr",,,,addr]]
+	[If, err,
+		[Note, [StrMerge, "Mem Block too Small  ", err]]
+		[Exit]
+	,
+		[VarSet, addrStr, ""]
+		[MemReadString, addr, addrStr]
+		[Note, addrStr]
+		[MemDelete, addr]
+	]
+]
+
+[IButton, "SetSocketAddr",,
+	[RoutineCall,CheckSystem]
+	[MemCreate, addr, 256, 0]
+	[VarSet, err, [FileExecute,[Var,dllPath],"SetSocketAddr", "255.255.255.0229850"]]
+	[If, err,
+		[Note, "Invalid address"]
+		[Exit]
+	]
+]
+
+[IButton, "SocketSend",,
+	[RoutineCall,CheckSystem]
+	[MemCreate, output, 256, 0]
+	
+	[VarSet, err, [FileExecute,[Var,dllPath],"SocketSend", "cmds.createNode('transform')",,,output]]
+	[VarSet, outStr, ""]
+	[MemReadString, output, outStr]
+	[MemDelete, output]
+	[If, err,
+		[Note, [StrMerge, "Error Occured: ", outStr, err]]
+	,
+		[Note, outStr]
+	]
+]
+
+
+[IButton,"Test Version","Test DLL Version function",
+	[IConfig,4.8]
+	[RoutineCall,CheckSystem]
+	[VarSet,ver,[FileExecute,[Var,dllPath],"Version"]]
+	[Note,[StrMerge,"This DLL is version ",ver]]
+]
+
+
+
+[IButton,"Test HelloDLL","Test DLL HelloDLL function",
+	[IConfig,4.8]
+	[RoutineCall,CheckSystem]
+	[VarSet,stringArg,"Hello from ZBrush"]
+	//create buffer for response string
+	//this buffer can also pass a string to the dll (such as a second file path)
+	[MemCreate,Test_DLL_mem, 256, 0]	
+	[VarSet,err,[FileExecute,[Var,dllPath],"HelloDLL",#stringArg,,Test_DLL_mem]]
+	[If,err,
+		[Note,"An error has occured"]
+		[Exit]
+		,
+		[MemReadString,Test_DLL_mem,#responseString]
+		[Note,responseString]//should say 'Hello from my DLL'
+		[MemDelete,Test_DLL_mem]//done with buffer, delete it
+	]
+]
