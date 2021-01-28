@@ -156,17 +156,18 @@ ZSOCKET_API float SocketSend(char* text, double number, char* memBlockIn, int me
         return static_cast<float>(error);
     }
 
+    // time out info
+    // https://stackoverflow.com/questions/30395258/setting-timeout-to-recv-function
     fd_set set;
     struct timeval timeout;
     FD_ZERO(&set); /* clear the set */
     FD_SET(ConnectSocket, &set); /* add our file descriptor to the set */
     timeout.tv_sec = 5;
     timeout.tv_usec = 0;
-    // Receive until the peer closes the connection
+    
     float ret = 0.0f;
     do {
-
-
+        
         iResult = select(static_cast<int>(ConnectSocket) + 1, &set, NULL, NULL, &timeout);
         if (iResult == SOCKET_ERROR)
         {
@@ -182,7 +183,7 @@ ZSOCKET_API float SocketSend(char* text, double number, char* memBlockIn, int me
         }
         else
         {
-
+            // Receive until the peer closes the connection
             iResult = recv(ConnectSocket, memBlockOut, memBlockSizeOut, 0);
             if (iResult > 0)
                 printf("Bytes received: %d\n", iResult);
