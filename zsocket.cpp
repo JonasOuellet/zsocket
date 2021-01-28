@@ -156,16 +156,41 @@ ZSOCKET_API float SocketSend(char* text, double number, char* memBlockIn, int me
         return static_cast<float>(error);
     }
 
+    fd_set set;
+    struct timeval timeout;
+    FD_ZERO(&set); /* clear the set */
+    FD_SET(ConnectSocket, &set); /* add our file descriptor to the set */
+    timeout.tv_sec = 5;
+    timeout.tv_usec = 0;
     // Receive until the peer closes the connection
+    float ret = 0.0f;
     do {
 
-        iResult = recv(ConnectSocket, memBlockOut, memBlockSizeOut, 0);
-        if (iResult > 0)
-            printf("Bytes received: %d\n", iResult);
+
+        iResult = select(static_cast<int>(ConnectSocket) + 1, &set, NULL, NULL, &timeout);
+        if (iResult == SOCKET_ERROR)
+        {
+            // select error...
+            printf("Select error ocurred.\n");
+            ret = -5.0f;
+        }
         else if (iResult == 0)
-            printf("Connection closed\n");
+        {
+            // timeout, socket does not have anything to read
+            printf("Connection timed out.\n");
+            ret = -4.0f;
+        }
         else
-            printf("recv failed with error: %d\n", WSAGetLastError());
+        {
+
+            iResult = recv(ConnectSocket, memBlockOut, memBlockSizeOut, 0);
+            if (iResult > 0)
+                printf("Bytes received: %d\n", iResult);
+            else if (iResult == 0)
+                printf("Connection closed\n");
+            else
+                printf("recv failed with error: %d\n", WSAGetLastError());
+        }
 
     } while (iResult > 0);
 
@@ -173,5 +198,5 @@ ZSOCKET_API float SocketSend(char* text, double number, char* memBlockIn, int me
     closesocket(ConnectSocket);
     WSACleanup();
 
-    return 0.0f;
+    return ret;
 }
