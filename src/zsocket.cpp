@@ -1,7 +1,6 @@
 // zsocket.cpp : Defines the exported functions for the DLL.
 //
 
-#include "framework.h"
 #include "zsocket.h"
 
 #include <cstring>
@@ -200,4 +199,22 @@ ZSOCKET_API float SocketSend(char* text, double number, char* memBlockIn, int me
     WSACleanup();
 
     return ret;
+}
+
+
+ZSOCKET_API float Version(char* text, double number, char* memBlockIn, int memBlockSizeIn,
+    char* memBlockOut, int memBlockSizeOut, char** zData)
+{
+    std::string version = "1.0.0";
+
+    if (memBlockSizeOut > version.length())
+    {
+        strcpy_s(memBlockOut, memBlockSizeOut, version.c_str());
+        return 0.0f;
+    }
+    else
+    {
+        // memory block too small
+        return static_cast<float>(version.length());
+    }
 }

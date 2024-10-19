@@ -36,3 +36,8 @@ Debug
 x64
 
 .vs
+
+# cmake stuff
+build
+
+*.zsc

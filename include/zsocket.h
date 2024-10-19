@@ -1,5 +1,11 @@
 #pragma once
 
+
+#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+
+#include <Windows.h>
+
+
 // The following ifdef block is the standard way of creating macros which make exporting
 // from a DLL simpler. All files within this DLL are compiled with the ZSOCKET_EXPORTS
 // symbol defined on the command line. This symbol should not be defined on any project
@@ -27,8 +33,8 @@ ZSOCKET_API float SetSocketAddr(char* text, double number, char* memBlockIn, int
 ZSOCKET_API float SocketSend(char* text, double number, char* memBlockIn, int memBlockSizeIn,
 	char* memBlockOut, int memBlockSizeOut, char** zData);
 
-ZSOCKET_API float Version(char* pDontCare, double optValue, char* pOptBuffer1, int optBuffer1Size,
-	char* pOptBuffer2, int optBuffer2Size, char** zData);
+ZSOCKET_API float Version(char* text, double number, char* memBlockIn, int memBlockSizeIn,
+    char* memBlockOut, int memBlockSizeOut, char** zData);
 
 #ifdef __cplusplus
 }

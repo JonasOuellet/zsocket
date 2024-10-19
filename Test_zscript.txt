@@ -6,7 +6,12 @@
 [VarDef,responseString,""]
 
 [RoutineDef,CheckSystem,
-	[VarSet,dllPath,"ZSOCKET.dll"]
+	/* check if on pc */
+    [If, [ZBrushInfo, 6] == 0,
+        [VarSet, dllPath, [FileNameResolvePath, "build\Release\zsocket.dll"]]
+    , /* Else */
+        [VarSet, dllPath, [FileNameResolvePath, "zsocket.dll"]]
+    ]
 	[If,[FileExists,dllPath],
 		,
 		[Note,"DLL is missing"][Exit]
@@ -32,7 +37,7 @@
 [IButton, "SetSocketAddr",,
 	[RoutineCall,CheckSystem]
 	[MemCreate, addr, 256, 0]
-	[VarSet, err, [FileExecute,[Var,dllPath],"SetSocketAddr", "255.255.255.0229850"]]
+	[VarSet, err, [FileExecute,[Var,dllPath],"SetSocketAddr", "127.0.0.1:6001"]]
 	[If, err,
 		[Note, "Invalid address"]
 		[Exit]
@@ -56,28 +61,18 @@
 
 
 [IButton,"Test Version","Test DLL Version function",
-	[IConfig,4.8]
 	[RoutineCall,CheckSystem]
-	[VarSet,ver,[FileExecute,[Var,dllPath],"Version"]]
-	[Note,[StrMerge,"This DLL is version ",ver]]
-]
+	[MemCreate, output, 256, 0]
 
+	[VarSet, err, [FileExecute, [Var,dllPath], "Version",,,, output]]
 
+	[VarSet, version, ""]
+	[MemReadString, output, version]
+	[MemDelete, output]
 
-[IButton,"Test HelloDLL","Test DLL HelloDLL function",
-	[IConfig,4.8]
-	[RoutineCall,CheckSystem]
-	[VarSet,stringArg,"Hello from ZBrush"]
-	//create buffer for response string
-	//this buffer can also pass a string to the dll (such as a second file path)
-	[MemCreate,Test_DLL_mem, 256, 0]	
-	[VarSet,err,[FileExecute,[Var,dllPath],"HelloDLL",#stringArg,,Test_DLL_mem]]
-	[If,err,
-		[Note,"An error has occured"]
-		[Exit]
-		,
-		[MemReadString,Test_DLL_mem,#responseString]
-		[Note,responseString]//should say 'Hello from my DLL'
-		[MemDelete,Test_DLL_mem]//done with buffer, delete it
+	[If, err,
+		[Note, [StrMerge, "Error Occured: ", err]]
+	,
+		[Note, [StrMerge, "This DLL is version: ", [Var, version]]]
 	]
 ]

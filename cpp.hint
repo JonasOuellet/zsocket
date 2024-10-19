@@ -1,2 +1,0 @@
-#define ZSOCKET_API __declspec(dllexport)
-#define ZSOCKET_API __declspec(dllimport)
